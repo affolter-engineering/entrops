@@ -1,4 +1,4 @@
-# prg320
+# entrops
 
 Interfaces for reading entropy from a [PRG320](https://www.ingenieurbuero-bergmann.de/prg320.html)
 hardware random number generator (HWRNG) by Ingenieurbüro Bergmann, connected via USB serial
