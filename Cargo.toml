@@ -1,0 +1,28 @@
+[package]
+name = "entrops"
+version = "0.1.0"
+edition = "2024"
+description = "Tools for reading entropy from a PRG320 hardware random number generator via USB serial"
+authors = ["Fabian Affolter <fabian@affolter-engineering.ch>"]
+license = "MIT"
+keywords = ["entropy", "rng", "hwrng", "prg320", "serial"]
+categories = ["hardware-support", "cryptography"]
+
+[[bin]]
+name = "entrops"
+path = "src/main.rs"
+
+[[bin]]
+name = "serve"
+path = "src/bin/serve.rs"
+
+[dependencies]
+hex = "0.4"
+num-bigint = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+serialport = "4"
+axum = "0.7"
+leptos = { version = "0.7", features = ["ssr"] }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
