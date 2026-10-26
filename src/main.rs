@@ -20,12 +20,7 @@ fn main() {
     output.insert("hex", hex::encode(&data).into());
     output.insert(
         "int",
-        serde_json::Value::Number(
-            BigUint::from_bytes_be(&data)
-                .to_string()
-                .parse()
-                .unwrap(),
-        ),
+        serde_json::Value::Number(BigUint::from_bytes_be(&data).to_string().parse().unwrap()),
     );
     output.insert("raw", format!("{:?}", data).into());
 
