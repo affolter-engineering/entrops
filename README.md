@@ -16,8 +16,8 @@ Multiple devices are supported simultaneously.
 ## Development
 
 ```sh
-$ nix-shell
-$ cargo build --release
+nix-shell
+cargo build --release
 ```
 
 ## Binaries
@@ -27,7 +27,7 @@ $ cargo build --release
 Reads a single sample from `/dev/ttyUSB0` and prints JSON to stdout.
 
 ```sh
-$ cargo run
+cargo run
 ```
 
 ```json
@@ -43,7 +43,7 @@ $ cargo run
 Streams live entropy data from all connected USB serial devices.
 
 ```sh
-$ cargo run --bin serve
+cargo run --bin serve
 ```
 
 Starts two listeners:
@@ -74,7 +74,7 @@ All endpoints return a JSON array with one entry per device. Samples are collect
 Example:
 
 ```sh
-$ curl http://localhost:3003/api/hex
+curl http://localhost:3003/api/hex
 ```
 
 ```json
@@ -84,12 +84,12 @@ $ curl http://localhost:3003/api/hex
 ## SSE stream
 
 ```sh
-$ curl -N http://localhost:3003/stream
+curl -N http://localhost:3003/stream
 ```
 
 Emits one event per sample across all devices:
 
-```
+```text
 data: {"device":"/dev/ttyUSB0","hex":"a3f10a","int":"10743050"}
 ```
 
@@ -98,10 +98,10 @@ data: {"device":"/dev/ttyUSB0","hex":"a3f10a","int":"10743050"}
 Connect with `netcat` to receive a continuous newline-delimited HEX stream:
 
 ```sh
-$ nc localhost 3004
+nc localhost 3004
 ```
 
-```
+```text
 a3f10a...
 c72e91...
 ```
@@ -117,8 +117,8 @@ Each line is the hex-encoded output of one sample. Multiple concurrent clients a
 Configure the port baud rate and hand it to `rngd`:
 
 ```sh
-$ stty -F /dev/ttyUSB0 921600 raw -echo
-$ rngd -r /dev/ttyUSB0 -o /dev/random
+stty -F /dev/ttyUSB0 921600 raw -echo
+rngd -r /dev/ttyUSB0 -o /dev/random
 ```
 
 For multiple devices, run one `rngd` instance per port.
@@ -128,16 +128,16 @@ For multiple devices, run one `rngd` instance per port.
 The TCP endpoint emits hex-encoded samples. Decode on the fly and pipe into `rngd` using a named pipe:
 
 ```sh
-$ mkfifo /tmp/entropy
-$ nc localhost 3004 | xxd -r -p > /tmp/entropy &
-$ rngd -r /tmp/entropy -o /dev/random -f
+mkfifo /tmp/entropy
+nc localhost 3004 | xxd -r -p > /tmp/entropy &
+rngd -r /tmp/entropy -o /dev/random -f
 ```
 
 ### Testing entropy quality with rngtest
 
 `rngtest` (also from `rng-tools`) runs FIPS 140-2 statistical tests against the byte stream:
 
-```sh
+```text
 $ nix-shell -p rng-tools tinyxxd
 $ nc localhost 3004 | xxd -r -p | rngtest -c 1000
 rngtest 6.17
