@@ -1,6 +1,6 @@
 [package]
 name = "entrops"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Tools for reading entropy from a PRG320 hardware random number generator via USB serial"
 authors = ["Fabian Affolter <fabian@affolter-engineering.ch>"]

@@ -1,13 +1,13 @@
 //! Leptos web app streaming entropy data from all USB serial devices via SSE.
 
 use axum::{
+    Json, Router,
     extract::State,
     response::{
-        sse::{Event, KeepAlive, Sse},
         Html,
+        sse::{Event, KeepAlive, Sse},
     },
     routing::get,
-    Json, Router,
 };
 use futures::stream::{self, Stream};
 use leptos::prelude::*;
@@ -184,11 +184,17 @@ async fn collect_samples(state: &Arc<AppState>) -> Vec<Sample> {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(15);
     while results.len() < state.devices.len() {
         match tokio::time::timeout_at(deadline, rx.recv()).await {
-            Ok(Ok(s)) => { results.entry(s.device.clone()).or_insert(s); }
+            Ok(Ok(s)) => {
+                results.entry(s.device.clone()).or_insert(s);
+            }
             _ => break,
         }
     }
-    state.devices.iter().filter_map(|d| results.remove(d)).collect()
+    state
+        .devices
+        .iter()
+        .filter_map(|d| results.remove(d))
+        .collect()
 }
 
 /// Handle the /api endpoint, returning all samples as JSON.
@@ -199,20 +205,35 @@ async fn api(State(state): State<Arc<AppState>>) -> Json<Vec<serde_json::Value>>
 
 /// Return only the hex values of the samples.
 async fn api_hex(State(state): State<Arc<AppState>>) -> Json<Vec<serde_json::Value>> {
-    Json(collect_samples(&state).await.into_iter()
-        .map(|s| serde_json::json!({"timestamp": s.timestamp, "hex": s.hex})).collect())
+    Json(
+        collect_samples(&state)
+            .await
+            .into_iter()
+            .map(|s| serde_json::json!({"timestamp": s.timestamp, "hex": s.hex}))
+            .collect(),
+    )
 }
 
 /// Handle the /api/int endpoint, returning the integer representation of the samples.
 async fn api_int(State(state): State<Arc<AppState>>) -> Json<Vec<serde_json::Value>> {
-    Json(collect_samples(&state).await.into_iter()
-        .map(|s| serde_json::json!({"timestamp": s.timestamp, "int": s.int})).collect())
+    Json(
+        collect_samples(&state)
+            .await
+            .into_iter()
+            .map(|s| serde_json::json!({"timestamp": s.timestamp, "int": s.int}))
+            .collect(),
+    )
 }
 
 /// Return the raw data from all devices as JSON.
 async fn api_raw(State(state): State<Arc<AppState>>) -> Json<Vec<serde_json::Value>> {
-    Json(collect_samples(&state).await.into_iter()
-        .map(|s| serde_json::json!({"timestamp": s.timestamp, "raw": s.raw})).collect())
+    Json(
+        collect_samples(&state)
+            .await
+            .into_iter()
+            .map(|s| serde_json::json!({"timestamp": s.timestamp, "raw": s.raw}))
+            .collect(),
+    )
 }
 
 /// Handle a TCP client connection and stream samples to it.
@@ -236,7 +257,7 @@ async fn handle_tcp_client(mut socket: TcpStream, state: Arc<AppState>) {
     }
 }
 
-///
+/// Accept TCP connections and stream hex samples line by line to each client.
 async fn tcp_server(state: Arc<AppState>) {
     let listener = TcpListener::bind("0.0.0.0:3004").await.unwrap();
     println!("TCP streaming on 0.0.0.0:3004");
